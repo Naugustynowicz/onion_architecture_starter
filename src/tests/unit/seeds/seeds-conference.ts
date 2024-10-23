@@ -1,4 +1,3 @@
-import { endOfDay } from "date-fns";
 import { Conference } from "../../../domain/entities/conference-entity";
 import { testUsers } from "./seeds-user";
 
