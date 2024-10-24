@@ -8,15 +8,16 @@ import { RandomIdGenerator } from "../../shared/utils/random-id-generator";
 import { InMemoryBookingRepository } from "../../tests/in-memory/in-memory-booking-repository";
 import { InMemoryConferenceRepository } from "../../tests/in-memory/in-memory-conference-repository";
 import { InMemoryMailer } from "../../tests/in-memory/in-memory-mailer";
-import { InMemoryUserRepository } from "../../tests/in-memory/in-memory-user-repository";
 import { ChangeDates } from "../../usecases/change-dates";
 import { ChangeSeats } from "../../usecases/change-seats";
 import { OrganizeConference } from "../../usecases/organize-conference";
 import { BasicAuthenticator } from "../authenticators/basic-authenticator";
+import { MongoUser } from "../database/mongo/mongo-user";
+import { MongoUserRepository } from "../database/mongo/mongo-user-repository";
 
 export interface Dependencies {
     conferenceRepository: InMemoryConferenceRepository
-    userRepository: InMemoryUserRepository
+    userRepository: MongoUserRepository
     idGenerator: IIdGenerator
     dateGenerator: IDateGenerator
     authenticator: IAuthenticator
@@ -31,12 +32,12 @@ const container = createContainer<Dependencies>()
 
 container.register({
     conferenceRepository: asClass(InMemoryConferenceRepository).singleton(),
-    userRepository: asClass(InMemoryUserRepository).singleton(),
     bookingRepository: asClass(InMemoryBookingRepository).singleton(),
     idGenerator: asClass(RandomIdGenerator).singleton(),
     dateGenerator: asClass(CurrentDateGenerator).singleton(),
     mailer: asClass(InMemoryMailer).singleton(),
 
+    userRepository: asFunction(() => new MongoUserRepository(MongoUser.UserModel)).singleton(),
     authenticator: asFunction(
         ({userRepository}) => new BasicAuthenticator(userRepository)
     ).singleton(),

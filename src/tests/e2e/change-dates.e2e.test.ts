@@ -26,6 +26,10 @@ describe('Usercase: Change dates', () => {
         app = testApp.expressApp
     })
 
+    afterAll( async () => {
+        testApp.tearDown()
+    })
+
     it('should change the dates', async () => {
         // const token = Buffer.from(`${testUsers.johnDoe.props.email}:${testUsers.johnDoe.props.password}`).toString('base64')
         const startDate = addDays(new Date(), 6)

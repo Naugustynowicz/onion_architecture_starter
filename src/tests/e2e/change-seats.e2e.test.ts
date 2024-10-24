@@ -23,6 +23,10 @@ describe('Usercase: Change seats', () => {
         app = testApp.expressApp
     })
 
+    afterAll( async () => {
+        testApp.tearDown()
+    })
+
     it('should change the number of seats', async () => {
         const token = Buffer.from(`${testUsers.johnDoe.props.email}:${testUsers.johnDoe.props.password}`).toString('base64')
 

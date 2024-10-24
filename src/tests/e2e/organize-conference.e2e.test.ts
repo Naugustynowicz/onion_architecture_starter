@@ -17,6 +17,10 @@ describe('Usercase: Organize Conference', () => {
         app = testApp.expressApp
     })
 
+    afterAll( async () => {
+        testApp.tearDown()
+    })
+
     it('should organize a conference', async () => {
         // jest.spyOn(BasicAuthenticator.prototype, 'authenticate').mockResolvedValue(testUsers.johnDoe)
 
