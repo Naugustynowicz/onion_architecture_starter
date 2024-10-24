@@ -1,11 +1,15 @@
 import { asClass, asFunction, createContainer } from "awilix";
 import { IAuthenticator } from "../../interfaces/authenticator.interface";
+import { IBookingRepository } from "../../interfaces/booking-repository.interface";
 import { IDateGenerator } from "../../interfaces/date-generator.interface";
 import { IIdGenerator } from "../../interfaces/id-generator.interface";
 import { CurrentDateGenerator } from "../../shared/utils/current-date-generator";
 import { RandomIdGenerator } from "../../shared/utils/random-id-generator";
+import { InMemoryBookingRepository } from "../../tests/in-memory/in-memory-booking-repository";
 import { InMemoryConferenceRepository } from "../../tests/in-memory/in-memory-conference-repository";
+import { InMemoryMailer } from "../../tests/in-memory/in-memory-mailer";
 import { InMemoryUserRepository } from "../../tests/in-memory/in-memory-user-repository";
+import { ChangeDates } from "../../usecases/change-dates";
 import { ChangeSeats } from "../../usecases/change-seats";
 import { OrganizeConference } from "../../usecases/organize-conference";
 import { BasicAuthenticator } from "../authenticators/basic-authenticator";
@@ -18,6 +22,9 @@ export interface Dependencies {
     authenticator: IAuthenticator
     organizeConferenceUsecase: OrganizeConference
     changeSeatsUsecase: ChangeSeats
+    mailer: InMemoryMailer
+    bookingRepository: IBookingRepository
+    changeDatesUsecase: ChangeDates
 }
 
 const container = createContainer<Dependencies>()
@@ -25,8 +32,10 @@ const container = createContainer<Dependencies>()
 container.register({
     conferenceRepository: asClass(InMemoryConferenceRepository).singleton(),
     userRepository: asClass(InMemoryUserRepository).singleton(),
+    bookingRepository: asClass(InMemoryBookingRepository).singleton(),
     idGenerator: asClass(RandomIdGenerator).singleton(),
     dateGenerator: asClass(CurrentDateGenerator).singleton(),
+    mailer: asClass(InMemoryMailer).singleton(),
 
     authenticator: asFunction(
         ({userRepository}) => new BasicAuthenticator(userRepository)
@@ -37,6 +46,9 @@ container.register({
     ).singleton(), 
     changeSeatsUsecase: asFunction(
         ({conferenceRepository}) => new ChangeSeats(conferenceRepository)
+    ).singleton(),
+    changeDatesUsecase: asFunction(
+        ({conferenceRepository, mailer, bookingRepository, userRepository, dateGenerator}) => new ChangeDates(conferenceRepository, mailer, bookingRepository, userRepository, dateGenerator)
     ).singleton()
 })
 
