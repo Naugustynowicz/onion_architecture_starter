@@ -45,6 +45,6 @@ export class Conference{
     }
 
     isOverbooked(nbBookings: number){
-        return nbBookings > this.props.seats
+        return nbBookings >= this.props.seats
     }
 }

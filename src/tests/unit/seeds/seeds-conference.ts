@@ -16,6 +16,6 @@ export const testConferences = {
         title: 'Nouvelle Conference',
         startDate: new Date(),
         endDate: new Date(),
-        seats: 50
+        seats: 25
     })
 }
