@@ -1,3 +1,4 @@
+import { JwtAuthenticator } from "../../infrastructure/authenticators/jwt-authenticator"
 import { InMemoryUserRepository } from "../in-memory/in-memory-user-repository"
 import { testUsers } from "./seeds/seeds-user"
 
