@@ -14,7 +14,7 @@ describe('Authenticator', () => {
     })
 
     describe('Scenario: token is valid', () => {
-        const payload = Buffer.from(`${testUsers.johnDoe.props.email}:${testUsers.johnDoe.props.password}`).toString('base64')
+        const payload = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG5kb2VAZ21haWwuY29tIiwicGFzc3dvcmQiOiJxd2VydHkifQ.0fz20ShOf1wmIYS6UqUd2mkjUaQp5NudAfi3hsHT53U'
 
         it('should authenticate a user', async () => {
             const user = await authenticator.authenticate(payload)
@@ -28,7 +28,7 @@ describe('Authenticator', () => {
     })
     
     describe('Scenario: token is not valid', () => {
-        const payload = Buffer.from(`unknow@gmail.com:${testUsers.johnDoe.props.password}`).toString('base64')
+        const payload = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVudmFsaWRFbWFpbCIsInBhc3N3b3JkIjoicXdlcnR5In0.0hRWuuKBOqGJeXv1LwiIiOHT4apJ2V5vggXEj3JgSEc'
 
         it('should throw an error', async () => {
             await expect(authenticator.authenticate(payload)).rejects.toThrow('Wrong credentials.')
@@ -36,7 +36,7 @@ describe('Authenticator', () => {
     })
 
     describe('Scenario: password is not valid', () => {
-        const payload = Buffer.from(`${testUsers.johnDoe.props.email}:unvalidPassword`).toString('base64')
+        const payload = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG5kb2VAZ21haWwuY29tIiwicGFzc3dvcmQiOiJ1bnZhbGlkUGFzc3dvcmQifQ.pT4rQe8OP5CK3nNenuk5xbrJFQ0PygIxnQm9OgWAWzY'
 
         it('should throw an error', async () => {
             await expect(authenticator.authenticate(payload)).rejects.toThrow('Wrong credentials.')
