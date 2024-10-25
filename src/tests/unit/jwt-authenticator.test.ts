@@ -26,8 +26,16 @@ describe('Authenticator', () => {
             })
         })
     })
-    
+
     describe('Scenario: token is not valid', () => {
+        const payload = 'NotAValidToken'
+
+        it('should throw an error', async () => {
+            await expect(authenticator.authenticate(payload)).rejects.toThrow("Invalid token specified: missing part #2")
+        })
+    })
+    
+    describe('Scenario: user is not valid', () => {
         const payload = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVudmFsaWRFbWFpbCIsInBhc3N3b3JkIjoicXdlcnR5In0.0hRWuuKBOqGJeXv1LwiIiOHT4apJ2V5vggXEj3JgSEc'
 
         it('should throw an error', async () => {
