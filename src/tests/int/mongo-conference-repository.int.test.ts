@@ -1,22 +1,23 @@
 import { Model } from "mongoose"
-import { MongoUser } from "../../infrastructure/database/mongo/mongo-user"
-import { MongoUserRepository } from "../../infrastructure/database/mongo/mongo-user-repository"
+import { MongoConference } from "../../infrastructure/database/mongo/mongo-conference"
+import { MongoConferenceRepository } from "../../infrastructure/database/mongo/mongo-conference-repository"
 import { TestApp } from "../e2e/utils/test-app"
 import { testUsers } from "../unit/seeds/seeds-user"
 
 describe('MongoUserRepository Integration', () => {
     let app: TestApp
-    let model: Model<MongoUser.UserDocument>
-    let repository: MongoUserRepository
+    let model: Model<MongoConference.ConferenceDocument>
+    let repository: MongoConferenceRepository
 
     beforeEach(async () =>{
         app = new TestApp()
         await app.setup()
 
-        model = MongoUser.UserModel
+        model = MongoConference.ConferenceDocument
         await model.deleteMany({})
-        repository = new MongoUserRepository(model)
+        repository = new MongoConferenceRepository(model)
 
+        //WIP
         const record =  new model({
             _id: testUsers.alice.props.id,
             email: testUsers.alice.props.email,
