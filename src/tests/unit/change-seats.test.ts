@@ -1,32 +1,27 @@
 import { ChangeSeats } from "../../usecases/change-seats"
+import { InMemoryBookingRepository } from "../in-memory/in-memory-booking-repository"
 import { InMemoryConferenceRepository } from "../in-memory/in-memory-conference-repository"
+import { testBookings } from "./seeds/seeds-booking"
 import { testConferences } from "./seeds/seeds-conference"
 import { testUsers } from "./seeds/seeds-user"
 
 describe('Usercase: change number of seats', () => {
     let usecase: ChangeSeats
-    let repository: InMemoryConferenceRepository
+    let conferenceRepository: InMemoryConferenceRepository
+    let bookingRepository: InMemoryBookingRepository
     
 
     beforeEach(async () => {
-        repository = new InMemoryConferenceRepository() 
-        // conference = await new OrganizeConference(repository, new FixedIdGenerator(), new FixedDateGenerator()).execute({
-        //     user: new User({id: 'John Doe'}),
-        //     title: "Nouvelle conference",
-        //     startDate: new Date('2024-01-04T10:00:00.000Z'),
-        //     endDate: new Date('2024-01-04T11:00:00.000Z'),
-        //     seats: 50
-        // })
-        await repository.create(testConferences.conference)
-        usecase = new ChangeSeats(repository)
-        
+        conferenceRepository = new InMemoryConferenceRepository() 
+        bookingRepository = new InMemoryBookingRepository()
+        await conferenceRepository.create(testConferences.conference)
+        usecase = new ChangeSeats(conferenceRepository, bookingRepository)
     })
 
     describe('Scenario: Happy path', () => {
         //setup
         const payload = {
             conferenceId: testConferences.conference.props.id, 
-            //conferenceId: conference.id,
             seats: 100,
             user: testUsers.johnDoe
         }
@@ -36,7 +31,7 @@ describe('Usercase: change number of seats', () => {
             await usecase.execute(payload)
     
             //expect(repository.database[0].props.seats).toEqual(payload.newSeats)
-            const fetchedConference = await repository.findById(testConferences.conference.props.id)
+            const fetchedConference = await conferenceRepository.findById(testConferences.conference.props.id)
             
             expect(fetchedConference).toBeDefined()
             expect(fetchedConference!.props.seats).toEqual(100)
@@ -45,13 +40,13 @@ describe('Usercase: change number of seats', () => {
         it('should not insert or delete conference in db', async () => {
             await usecase.execute(payload)
 
-            expect(repository.database).toHaveLength(1)
+            expect(conferenceRepository.database).toHaveLength(1)
         })
 
         it('conference object should still be here', async () => {
             await usecase.execute(payload)
     
-            expect(repository.database[0].props.id).toEqual(payload.conferenceId)
+            expect(conferenceRepository.database[0].props.id).toEqual(payload.conferenceId)
         })
 
         
@@ -112,6 +107,47 @@ describe('Usercase: change number of seats', () => {
         //tests
         it('should update conference seats', async () => {
             await expect(usecase.execute(payload)).rejects.toThrow('You are not allowed to change this conference.')
+        })
+    })
+
+    describe('Scenario: Never less the number of booking already done', () => {
+        //setup
+        const payload = {
+            conferenceId: testConferences.overBookedConference.props.id, 
+            seats: 21,
+            user: testUsers.johnDoe
+        }
+
+        //test
+        it('should throw an error', async () => {
+            await conferenceRepository.create(testConferences.overBookedConference)
+            await bookingRepository.create(testBookings.aliceBookingSpam1)
+            await bookingRepository.create(testBookings.aliceBookingSpam2)
+            await bookingRepository.create(testBookings.aliceBookingSpam3)
+            await bookingRepository.create(testBookings.aliceBookingSpam4)
+            await bookingRepository.create(testBookings.aliceBookingSpam5)
+            await bookingRepository.create(testBookings.aliceBookingSpam6)
+            await bookingRepository.create(testBookings.aliceBookingSpam7)
+            await bookingRepository.create(testBookings.aliceBookingSpam8)
+            await bookingRepository.create(testBookings.aliceBookingSpam9)
+            await bookingRepository.create(testBookings.aliceBookingSpam10)
+            await bookingRepository.create(testBookings.aliceBookingSpam11)
+            await bookingRepository.create(testBookings.aliceBookingSpam12)
+            await bookingRepository.create(testBookings.aliceBookingSpam13)
+            await bookingRepository.create(testBookings.aliceBookingSpam14)
+            await bookingRepository.create(testBookings.aliceBookingSpam15)
+            await bookingRepository.create(testBookings.aliceBookingSpam16)
+            await bookingRepository.create(testBookings.aliceBookingSpam17)
+            await bookingRepository.create(testBookings.aliceBookingSpam18)
+            await bookingRepository.create(testBookings.aliceBookingSpam19)
+            await bookingRepository.create(testBookings.aliceBookingSpam20)
+            await bookingRepository.create(testBookings.aliceBookingSpam21)
+            await bookingRepository.create(testBookings.aliceBookingSpam22)
+            await bookingRepository.create(testBookings.aliceBookingSpam23)
+            await bookingRepository.create(testBookings.aliceBookingSpam24)
+            await bookingRepository.create(testBookings.aliceBookingSpam25)
+
+            await expect(usecase.execute(payload)).rejects.toThrow('Conference already have 25 bookings, cannot go below.')
         })
     })
 })

@@ -43,4 +43,8 @@ export class Conference{
     isTheOrganizer(user: User){
         return this.props.organizerId === user.props.id
     }
+
+    isOverbooked(nbBookings: number){
+        return nbBookings > this.props.seats
+    }
 }

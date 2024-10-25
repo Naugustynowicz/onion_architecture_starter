@@ -9,5 +9,13 @@ export const testConferences = {
         startDate: new Date(),
         endDate: new Date(),
         seats: 50
+    }),
+    overBookedConference: new Conference({
+        id: 'id-2',
+        organizerId: testUsers.johnDoe.props.id,
+        title: 'Nouvelle Conference',
+        startDate: new Date(),
+        endDate: new Date(),
+        seats: 50
     })
 }

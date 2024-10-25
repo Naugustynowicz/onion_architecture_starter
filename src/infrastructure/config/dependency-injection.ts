@@ -3,6 +3,7 @@ import { IAuthenticator } from "../../interfaces/authenticator.interface";
 import { IBookingRepository } from "../../interfaces/booking-repository.interface";
 import { IDateGenerator } from "../../interfaces/date-generator.interface";
 import { IIdGenerator } from "../../interfaces/id-generator.interface";
+import { IMessageBroker } from "../../interfaces/message-broker.interface";
 import { CurrentDateGenerator } from "../../shared/utils/current-date-generator";
 import { RandomIdGenerator } from "../../shared/utils/random-id-generator";
 import { InMemoryBookingRepository } from "../../tests/in-memory/in-memory-booking-repository";
@@ -14,6 +15,7 @@ import { OrganizeConference } from "../../usecases/organize-conference";
 import { BasicAuthenticator } from "../authenticators/basic-authenticator";
 import { MongoUser } from "../database/mongo/mongo-user";
 import { MongoUserRepository } from "../database/mongo/mongo-user-repository";
+import { RabbitMqPublisher } from "../publisher/rabbitmq-publisher";
 
 export interface Dependencies {
     conferenceRepository: InMemoryConferenceRepository
@@ -26,6 +28,7 @@ export interface Dependencies {
     mailer: InMemoryMailer
     bookingRepository: IBookingRepository
     changeDatesUsecase: ChangeDates
+    messageBroker: IMessageBroker
 }
 
 const container = createContainer<Dependencies>()
@@ -37,13 +40,14 @@ container.register({
     dateGenerator: asClass(CurrentDateGenerator).singleton(),
     mailer: asClass(InMemoryMailer).singleton(),
 
+    messageBroker: asFunction(() => new RabbitMqPublisher('amqp://localhost')).singleton(),
     userRepository: asFunction(() => new MongoUserRepository(MongoUser.UserModel)).singleton(),
     authenticator: asFunction(
         ({userRepository}) => new BasicAuthenticator(userRepository)
     ).singleton(),
 
     organizeConferenceUsecase: asFunction(
-        ({conferenceRepository, idGenerator, dateGenerator}) => new OrganizeConference(conferenceRepository, idGenerator, dateGenerator)
+        ({conferenceRepository, idGenerator, dateGenerator, messageBroker}) => new OrganizeConference(conferenceRepository, idGenerator, dateGenerator, messageBroker)
     ).singleton(), 
     changeSeatsUsecase: asFunction(
         ({conferenceRepository}) => new ChangeSeats(conferenceRepository)

@@ -1,22 +1,24 @@
 import { OrganizeConference } from "../../usecases/organize-conference";
+import { FixedDateGenerator } from "../fixed/fixed-date-generator";
 import { FixedIdGenerator } from "../fixed/fixed-id-generator";
 import { InMemoryConferenceRepository } from "../in-memory/in-memory-conference-repository";
-import { IIdGenerator } from "../../interfaces/id-generator.interface";
-import { FixedDateGenerator } from "../fixed/fixed-date-generator";
-import { User } from "../../domain/entities/user-entity";
+import { InMemoryPublisher } from "../in-memory/in-memory-publisher";
+import { testConferences } from "./seeds/seeds-conference";
 import { testUsers } from "./seeds/seeds-user";
 
 describe('Usercase: Organize a conference', () => {
     let repository: InMemoryConferenceRepository
     let idGenerator: FixedIdGenerator
     let dateGenerator: FixedDateGenerator
+    let messageBroker: InMemoryPublisher
     let usecase: OrganizeConference
 
     beforeEach(() => {
         repository = new InMemoryConferenceRepository() 
         idGenerator = new FixedIdGenerator()
         dateGenerator = new FixedDateGenerator()
-        usecase = new OrganizeConference(repository, idGenerator, dateGenerator)
+        messageBroker: new InMemoryPublisher()
+        usecase = new OrganizeConference(repository, idGenerator, dateGenerator, messageBroker)
     })
 
     describe('Scenario: Happy path', () => {
@@ -42,6 +44,19 @@ describe('Usercase: Organize a conference', () => {
 
             expect(repository.database).toHaveLength(1)
             expect(repository.database[0].props.title).toEqual('Nouvelle conference')
+        })
+
+        it('should publish a message', async () => {
+            await usecase.execute(payload)
+
+            const publishedMessages = messageBroker.getPublishedMessages('conference_created')
+            expect(publishedMessages).toHaveLength(1)
+            expect(publishedMessages[0]).toEqual({
+                conferenceId: expect.any(String),
+                organizerEmail: testUsers.johnDoe.props.email,
+                title: testConferences.conference.props.title,
+                seats: testConferences.conference.props.seats
+            })
         })
     })
 
